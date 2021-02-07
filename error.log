@@ -1,0 +1,22 @@
+2021-01-23 16:08:47,302:root:URL:https://collinsfoods.riteq.com.au/webess##login could not be reached. ERROR CODE: Message: Timed out after 10s waiting for request https://collinsfoods.riteq.com.au/WebEss/api/ScheduleApi/GetSchedulesWithRange
+
+2021-02-07 16:07:19,025:seleniumwire.proxy.handler:Error making request
+Traceback (most recent call last):
+  File "C:\Users\newma\PycharmProjects\KFC_work_automation\venv\lib\site-packages\seleniumwire\proxy\proxy2.py", line 92, in proxy_request
+    res = conn.getresponse()
+  File "C:\Users\newma\AppData\Local\Programs\Python\Python39\lib\http\client.py", line 1347, in getresponse
+    response.begin()
+  File "C:\Users\newma\AppData\Local\Programs\Python\Python39\lib\http\client.py", line 307, in begin
+    version, status, reason = self._read_status()
+  File "C:\Users\newma\AppData\Local\Programs\Python\Python39\lib\http\client.py", line 268, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "C:\Users\newma\AppData\Local\Programs\Python\Python39\lib\socket.py", line 704, in readinto
+    return self._sock.recv_into(b)
+  File "C:\Users\newma\AppData\Local\Programs\Python\Python39\lib\ssl.py", line 1241, in recv_into
+    return self.read(nbytes, buffer)
+  File "C:\Users\newma\AppData\Local\Programs\Python\Python39\lib\ssl.py", line 1099, in read
+    return self._sslobj.read(len, buffer)
+socket.timeout: The read operation timed out
+2021-02-07 16:07:24,114:root:URL:https://collinsfoods.riteq.com.au/webess##login could not be reached. ERROR CODE: Message: no such element: Unable to locate element: {"method":"xpath","selector":"//*[@id="captchaImage"]"}
+  (Session info: headless chrome=88.0.4324.146)
+
