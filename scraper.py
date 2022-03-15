@@ -8,18 +8,22 @@ from google.oauth2 import service_account
 
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
 
+
 class ScheduleUpdate:
     def __init__(self):
+        # Fill in your information in the line below
+        self.calender_id = ""
+
         logging.basicConfig(filename="error.log", level=logging.ERROR, format='%(asctime)s:%(name)s:%(message)s')
 
-        flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", scopes=SCOPES)
+        flow = InstalledAppFlow.from_client_secrets_file("OAuth_ClientID.json", scopes=SCOPES)
         if not os.path.exists("token.pkl"):
             self.credentials_OAuth = flow.run_console()
             pickle.dump(self.credentials_OAuth, open("token.pkl", "wb"))
         else:
             self.credentials_OAuth = pickle.load(open("token.pkl", "rb"))
 
-        self.credentials = service_account.Credentials.from_service_account_file("auto-hub-v2-da28b62c34e1.json")
+        self.credentials = service_account.Credentials.from_service_account_file("API_key.json")
         self.client = vision.ImageAnnotatorClient(credentials=self.credentials)
 
         self.url = "https://collinsfoods.riteq.com.au/webess##login"
@@ -28,7 +32,6 @@ class ScheduleUpdate:
         self.chrome.add_argument('--headless')
         self.chrome.add_argument('--disable-gpu')
 
-
         # Chrome Headless so no User Interface
         self.driver = webdriver.Chrome('chromedriver.exe', options=self.chrome)
 
@@ -36,8 +39,8 @@ class ScheduleUpdate:
             data = json.load(f)
         f.close()
 
-        self.username = data[ "username" ]
-        self.password = data[ "password" ]
+        self.username = data["username"]
+        self.password = data["password"]
 
         self.service = build('calendar', 'v3', credentials=self.credentials_OAuth)
 
@@ -48,7 +51,6 @@ class ScheduleUpdate:
         self.work_list = []
 
         self.success = False
-
 
     def login(self):
         try:
@@ -71,16 +73,16 @@ class ScheduleUpdate:
             code_textbox = self.driver.find_element_by_xpath('//*[@id="VerificationCode"]')
             code_textbox.send_keys(self.code)
 
-            sign_in_button = self.driver.find_elements_by_xpath('// *[ @ id = "loginButton" ]')[ 0 ]
+            sign_in_button = self.driver.find_elements_by_xpath('// *[ @ id = "loginButton" ]')[0]
             sign_in_button.click()
 
-            self.request = self.driver.wait_for_request("https://collinsfoods.riteq.com.au/WebEss/api/ScheduleApi/GetSchedulesWithRange")
+            self.request = self.driver.wait_for_request(
+                "https://collinsfoods.riteq.com.au/WebEss/api/ScheduleApi/GetSchedulesWithRange")
             if self.request is not None:
                 self.success = True
         except Exception as error:
             logging.error('URL:{} could not be reached. ERROR CODE: {}'.format(self.url, error))
             self.success = False
-
 
     def extract_schedule(self):
         try:
@@ -91,17 +93,15 @@ class ScheduleUpdate:
             logging.error(f'Schedule could not be extracted. ERROR CODE: {error}')
             self.success = False
 
-
     def get_events(self):
         now = datetime.datetime.utcnow().isoformat() + '+10:00'
         events_result = self.service.events().list(calendarId='primary', timeMin=now,
-                                              maxResults=14, singleEvents=True,
-                                              orderBy='startTime').execute()
-        events = events_result.get('items', [ ])
+                                                   maxResults=14, singleEvents=True,
+                                                   orderBy='startTime').execute()
+        events = events_result.get('items', [])
         for item in events:
             if item["summary"] == "Work":
                 self.work_list.append(item)
-
 
     def input_to_calender(self):
         calender_add = []
@@ -109,7 +109,8 @@ class ScheduleUpdate:
             if day["IsViewable"]:
                 check = True
                 for event in self.work_list:
-                    if day["StartTime"] + "+10:00" == event["start"]["dateTime"] and day["EndTime"] + "+10:00" == event["end"]["dateTime"]:
+                    if day["StartTime"] + "+10:00" == event["start"]["dateTime"] and day["EndTime"] + "+10:00" == \
+                            event["end"]["dateTime"]:
                         check = False
                 if check:
                     calender_add.append(day)
@@ -125,8 +126,7 @@ class ScheduleUpdate:
                 "colorId": 11,
                 "summary": "Work"
             }
-            self.service.events().insert(calendarId = "newmanbraydan@gmail.com", body = calender_request).execute()
-
+            self.service.events().insert(calendarId=self.calender_id, body=calender_request).execute()
 
     def image_to_text(self):
         file_name = os.path.abspath('captcha.png')
@@ -141,31 +141,5 @@ class ScheduleUpdate:
 
         self.code = re.sub('[^0-9]', '', texts[0].description)
 
-
     def driver_exit(self):
         self.driver.quit()
-
-
-    def complete_sequence(self):
-        for j in range(6):
-            self.login()
-            if self.success:
-                break
-            time.sleep(5)
-            if j > 5:
-                self.driver_exit()
-                return False
-
-        if self.success:
-            self.extract_schedule()
-        else:
-            return False
-        if self.success:
-            self.get_events()
-            self.input_to_calender()
-        else:
-            return False
-        if self.success:
-            return True
-        else:
-            return False
