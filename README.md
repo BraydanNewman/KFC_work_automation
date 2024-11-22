@@ -2,7 +2,7 @@
 
 ---
 
-## This project is only built for RITEQ and uses GCP as a provider for image processing calendar
+## This project is only built for RITEQ and uses GCP as a provider for image processing and calendar intergration
 
 ### In the main folder create the files:
 
